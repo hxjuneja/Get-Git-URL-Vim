@@ -77,7 +77,7 @@ class MakeURL(object):
         branch = self.get_branch(maxlength)
         #user = config.get_user()
 
-        URL = ["http:/","github","hardikj",lleng[len(lleng)-1],"blob",branch]  
+        URL = ["http:/","github.com","hardikj",lleng[len(lleng)-1],"blob",branch]  
 
         for i in b:
              URL.append(i)
