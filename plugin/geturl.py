@@ -2,8 +2,10 @@ import itertools
 import vim, os, pygtk
 pygtk.require('2.0')
 import gtk, subprocess
-import vim, os, random
+import random, sys
 
+sys.path.append('/home/hardik/.vim/plugin/Get-Git-URL-Vim/plugin/')
+from config import Config
 
 class Path(object):
     """
@@ -29,6 +31,12 @@ class MakeURL(object):
         self.dicpath = None
         self.path =  None
 
+    def empty(self,a):
+        try:
+            return all(map(empty, a))
+        except TypeError:
+            return False
+
     def getrepo(self):
         """
             get the git repositories
@@ -38,13 +46,14 @@ class MakeURL(object):
 
         repoin = self.dicpath[0]
 
-        p1 = subprocess.Popen(['find', "/"+repoin, '-type', 'd', '-name', '.git'], stdout=subprocess.PIPE)
-        p2 = subprocess.Popen(['xargs', '-n', '1', 'dirname'],stdin = p1.stdout, stdout=subprocess.PIPE)
-        p1.stdout.close()
+        pw = Config().get_pw()
+ 
+        p2 = subprocess.Popen('echo ' + pw +' |sudo -S find /'+ repoin+ ' -type d -name .git | xargs -n 1 dirname ',shell=True, stdin=subprocess.PIPE,
+                              stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         output = p2.communicate()
     
         dirs = output[0].split("\n")
-        
+
         sorted_dict = []
 
         for i in dirs:
@@ -53,7 +62,16 @@ class MakeURL(object):
                     i = []
             sorted_dict.append(i)
 
-        return sorted_dict
+        def IsEmpty(inList):
+            if isinstance(inList, list): # Is a list
+                return all( map(IsEmpty, inList) )
+            return False 
+
+        if IsEmpty(sorted_dict):
+            print "I only work on git repo!!"
+            sys.exit()
+        else:
+            return sorted_dict
 
     def geturl (self):
         """
@@ -75,9 +93,9 @@ class MakeURL(object):
                 b.append(i)
 
         branch = self.get_branch(maxlength)
-        #user = config.get_user()
+        user = Config().get_username()
 
-        URL = ["http:/","github.com","hardikj",lleng[len(lleng)-1],"blob",branch]  
+        URL = ["http:/","github.com",user,lleng[len(lleng)-1],"blob",branch]  
 
         for i in b:
              URL.append(i)
